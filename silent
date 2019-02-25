@@ -1,0 +1,47 @@
+#!/usr/bin/python3
+
+import argparse
+import subprocess
+import sys
+from pushover import Client
+import time
+
+parser = argparse.ArgumentParser(description='Execute long running commands more comfortably')
+parser.add_argument('commands', metavar='COMMAND', type=str, nargs='+', help='the command to run, commands with spaces (e.g. python test.py) are combined')
+parser.add_argument('-L', '--nolog', help="don't log the output", action="store_true")
+parser.add_argument('-f', '--logfile', help="destination logfile (.log is appended to the name)", default="silent")
+parser.add_argument('-v', '--verbose', help="don't suppress stdout and stderr", action="store_true")
+parser.add_argument('-N', '--nonotify', help="notify via pushover when done", action="store_true")
+parser.add_argument('-s', '--shutdown', help="shutdown after command is executed", action="store_true")
+
+args = parser.parse_args()
+
+filename = args.logfile + ".log"
+if not args.nolog:
+    logfile = open(filename, "w")
+
+child = subprocess.Popen(args.commands, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, universal_newlines=True)
+for line in child.stdout:
+    if args.verbose:
+        sys.stdout.write(line)
+    if not args.nolog:
+        logfile.write(line)
+
+returncode = child.wait()
+
+if not args.nonotify:
+    command = ' '.join(args.commands)
+    client = Client()
+    if returncode:
+        response = f"unsuccessfully, return code: {returncode}"
+    else:
+        response = f"successful"
+    message = f"{command} executed {response}"
+    client.send_message(message, title=command)
+
+if args.shutdown:
+    print("Shutting down...")
+    for i in range(6,0,-1):
+        print(i)
+        time.sleep(1)
+    subprocess.run("poweroff")
