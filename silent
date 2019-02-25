@@ -11,7 +11,7 @@ parser.add_argument('commands', metavar='COMMAND', type=str, nargs='+', help='th
 parser.add_argument('-L', '--nolog', help="don't log the output", action="store_true")
 parser.add_argument('-f', '--logfile', help="destination logfile (.log is appended to the name)", default="silent")
 parser.add_argument('-v', '--verbose', help="don't suppress stdout and stderr", action="store_true")
-parser.add_argument('-N', '--nonotify', help="notify via pushover when done", action="store_true")
+parser.add_argument('-N', '--nonotify', help="don't notify via pushover when done", action="store_true")
 parser.add_argument('-s', '--shutdown', help="shutdown after command is executed", action="store_true")
 
 args = parser.parse_args()
